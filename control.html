@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Race Control - Broad Leaderboard</title>
+<style>
+  :root { --primary: #1db954; --danger: #ff4444; --bg: #000; --card: #111; }
+  body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; padding: 5px; margin: 0; display: flex; justify-content: center; }
+  .container { width: 100%; max-width: 480px; }
+
+  /* Top Stats Board */
+  .result-board { background: var(--card); border: 1px solid #333; border-radius: 8px; padding: 10px 2px; display: flex; justify-content: space-around; margin-bottom: 12px; text-align: center; }
+  .stat-box { flex: 1; border-right: 1px solid #222; }
+  .stat-box:last-child { border-right: none; }
+  .stat-label { font-size: 8px; color: #888; text-transform: uppercase; display: block; margin-bottom: 2px; }
+  .stat-value { font-size: 13px; font-weight: 800; color: #fff; }
+  .res-1st { color: #ffd700 !important; } .res-2nd { color: #c0c0c0 !important; } .res-3rd { color: #cd7f32 !important; }
+
+  /* --- BROAD LEADERBOARD SETTING --- */
+  .mini-line { 
+    background: #141414; margin-bottom: 8px; padding: 12px; 
+    border-radius: 10px; display: flex; align-items: center; gap: 10px; 
+    border: 1px solid #282828; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  }
+  .pos-tag { font-size: 14px; font-weight: 900; width: 35px; text-align: center; }
+  
+  .input-group { display: flex; flex-direction: column; align-items: center; flex: 1; }
+  
+  .mini-input { 
+    font-size: 16px; padding: 8px 4px; border-radius: 6px; border: 1px solid #333; 
+    background: #000; color: #fff; width: 100%; text-align: center; font-weight: bold; 
+    transition: all 0.2s;
+  }
+  .mini-input:focus { border-color: var(--primary); background: #080808; }
+  .name-input { color: #00bcd4 !important; }
+  
+  .mini-info { font-size: 10px; color: #ffff00; margin-top: 4px; font-family: monospace; }
+  
+  .mini-btn { 
+    background: #2196f3; color: white; border: none; padding: 0 15px; 
+    border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; 
+    height: 45px; /* Broad button for broad inputs */
+    text-transform: uppercase;
+  }
+  .mini-btn:active { transform: scale(0.95); }
+
+  /* Bottom Options (Prev Fix & Name Toggle) */
+  .bottom-options {
+    background: #111; border: 1px dashed #444; margin: 15px 0; 
+    padding: 12px; border-radius: 10px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .opt-row { display: flex; align-items: center; justify-content: space-between; }
+  .prev-input { width: 100px; color: var(--primary); font-size: 20px; font-weight: bold; background: #000; border: 1px solid #333; text-align: center; border-radius: 6px; padding: 5px; }
+  
+  .toggle-btn { background: #333; color: white; border: none; padding: 8px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; min-width: 80px; }
+  .toggle-active { background: var(--primary); box-shadow: 0 0 10px rgba(29, 185, 84, 0.3); }
+
+  /* Action Buttons & Entry */
+  .reset-area { display: flex; gap: 6px; margin-bottom: 15px; }
+  .btn-reset { padding: 10px; border: none; border-radius: 6px; font-weight: bold; color: white; font-size: 9px; flex: 1; cursor: pointer; text-transform: uppercase; }
+  
+  .add-section { background: #000; border: 2px solid var(--primary); border-radius: 15px; padding: 15px; margin-bottom: 15px; text-align: center; }
+  .time-input-wadda { width: 100%; font-size: 45px; background: transparent; color: var(--primary); text-align: center; border: none; outline: none; font-weight: 800; }
+  .add-btn-wadda { width: 100%; background: var(--primary); color: white; font-size: 20px; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+
+  .ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ctrl-box { background: var(--card); padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #333; }
+  .btn-c { width: 40px; height: 40px; border-radius: 50%; border: none; color: white; font-size: 20px; background: #333; cursor: pointer; }
+  .disp { font-size: 26px; font-weight: bold; width: 50px; text-align: center; background: transparent; color: #fff; border: none; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="result-board">
+    <div class="stat-box"><span class="stat-label">Shift</span><span class="stat-value" id="res-s">0</span></div>
+    <div class="stat-box"><span class="stat-label">Race</span><span class="stat-value" id="res-r">0</span></div>
+    <div class="stat-box"><span class="stat-label">Prev</span><span class="stat-value" style="color:var(--primary)" id="res-line-prev">0.00</span></div>
+    <div class="stat-box"><span class="stat-label">1st</span><span class="stat-value res-1st" id="res-t1">--</span></div>
+    <div class="stat-box"><span class="stat-label">2nd</span><span class="stat-value res-2nd" id="res-t2">--</span></div>
+    <div class="stat-box"><span class="stat-label">3rd</span><span class="stat-value res-3rd" id="res-t3">--</span></div>
+  </div>
+
+  <div class="mini-line">
+    <span class="pos-tag res-1st">1ST</span>
+    <div class="input-group">
+      <input id="t1" class="mini-input" type="number" step="0.01" placeholder="Time">
+      <span class="mini-info" id="i1">--</span>
+    </div>
+    <div class="input-group">
+      <input id="n1" class="mini-input name-input" type="text" placeholder="Driver Name">
+    </div>
+    <button class="mini-btn" onclick="applyUpdate(0)">FIX</button>
+  </div>
+
+  <div class="mini-line">
+    <span class="pos-tag res-2nd">2ND</span>
+    <div class="input-group">
+      <input id="t2" class="mini-input" type="number" step="0.01" placeholder="Time">
+      <span class="mini-info" id="i2">--</span>
+    </div>
+    <div class="input-group">
+      <input id="n2" class="mini-input name-input" type="text" placeholder="Driver Name">
+    </div>
+    <button class="mini-btn" onclick="applyUpdate(1)">FIX</button>
+  </div>
+
+  <div class="mini-line">
+    <span class="pos-tag res-3rd">3RD</span>
+    <div class="input-group">
+      <input id="t3" class="mini-input" type="number" step="0.01" placeholder="Time">
+      <span class="mini-info" id="i3">--</span>
+    </div>
+    <div class="input-group">
+      <input id="n3" class="mini-input name-input" type="text" placeholder="Driver Name">
+    </div>
+    <button class="mini-btn" onclick="applyUpdate(2)">FIX</button>
+  </div>
+
+  <div class="bottom-options">
+    <div class="opt-row">
+        <span style="color:var(--danger); font-size: 12px; font-weight: 800;">MANUAL PREV FIX</span>
+        <div style="display:flex; gap:8px;">
+            <input id="prevTimeDisplay" class="prev-input" step="0.01" type="number">
+            <button class="mini-btn" style="height:38px;" onclick="fixPrev()">FIX</button>
+        </div>
+    </div>
+    <div class="opt-row">
+        <span style="font-size: 12px; font-weight: 800;">OVERLAY NAMES</span>
+        <button id="nameToggle" class="toggle-btn toggle-active" onclick="toggleNames()">ON</button>
+    </div>
+  </div>
+
+  <div class="reset-area">
+    <button class="btn-reset" style="background:var(--danger)" onclick="allReset()">ALL RESET</button>
+    <button class="btn-reset" style="background:#ffa500" onclick="prevReset()">PREV RESET</button>
+    <button class="btn-reset" style="background:#8e44ad" onclick="raceResetWithShift()">RACE+SHIFT</button>
+  </div>
+
+  <div class="add-section">
+    <input id="timeIn" class="time-input-wadda" type="number" step="0.01" placeholder="0.00" autofocus>
+    <button class="add-btn-wadda" onclick="addTime()">ADD ENTRY</button>
+  </div>
+
+  <div class="ctrl-grid">
+    <div class="ctrl-box"><span class="stat-label">Race Count</span><div style="display:flex; justify-content:center; align-items:center; margin-top:8px;"><button class="btn-c" onclick="raceDown()">-</button><input id="raceBox" class="disp" value="0" readonly><button class="btn-c" style="background:var(--danger)" onclick="raceUp()">+</button></div></div>
+    <div class="ctrl-box"><span class="stat-label">Shift Count</span><div style="display:flex; justify-content:center; align-items:center; margin-top:8px;"><button class="btn-c" onclick="shiftDown()">-</button><input id="shiftBox" class="disp" value="0" readonly><button class="btn-c" onclick="shiftUp()">+</button></div></div>
+  </div>
+</div>
+
+<script>
+let shift = 0, race = 0, entries = [], lastTime = "0.00", showNames = true;
+
+document.getElementById("timeIn").addEventListener("keypress", (e) => { if(e.key === "Enter") addTime(); });
+
+function toggleNames() {
+  showNames = !showNames;
+  localStorage.setItem('showNames', showNames);
+  const btn = document.getElementById('nameToggle');
+  btn.innerText = showNames ? "ON" : "OFF";
+  btn.className = showNames ? "toggle-btn toggle-active" : "toggle-btn";
+}
+
+function loadData() {
+  const savedEntries = localStorage.getItem('raceData');
+  const savedMeta = localStorage.getItem('raceMeta');
+  const savedPrev = localStorage.getItem('lastTime');
+  const savedNames = localStorage.getItem('showNames');
+  if (savedEntries) entries = JSON.parse(savedEntries);
+  if (savedMeta) { const m = JSON.parse(savedMeta); shift = m.s; race = m.r; }
+  if (savedPrev) lastTime = savedPrev;
+  if (savedNames !== null) { showNames = savedNames === "true"; }
+  const btn = document.getElementById('nameToggle');
+  btn.innerText = showNames ? "ON" : "OFF";
+  btn.className = showNames ? "toggle-btn toggle-active" : "toggle-btn";
+  updateCounters();
+}
+
+function updateCounters() { 
+  document.getElementById("raceBox").value = race; 
+  document.getElementById("shiftBox").value = shift; 
+  refresh(); 
+}
+
+function refresh() {
+  entries.sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
+  localStorage.setItem('raceData', JSON.stringify(entries));
+  localStorage.setItem('raceMeta', JSON.stringify({s: shift, r: race}));
+  localStorage.setItem('lastTime', lastTime);
+  document.getElementById("res-s").innerText = shift;
+  document.getElementById("res-r").innerText = race;
+  document.getElementById("res-line-prev").innerText = lastTime;
+  document.getElementById("prevTimeDisplay").value = lastTime;
+  [1,2,3].forEach(i => {
+    const e = entries[i-1];
+    document.getElementById("res-t" + i).innerText = e ? e.time : "--";
+    document.getElementById("t" + i).value = e ? e.time : "";
+    document.getElementById("n" + i).value = e && e.name ? e.name : "";
+    document.getElementById("i" + i).innerText = e ? `(${e.s}-${e.r})` : "--";
+  });
+}
+
+function fixPrev() {
+  const val = parseFloat(document.getElementById("prevTimeDisplay").value);
+  if (!isNaN(val)) { lastTime = val.toFixed(2); refresh(); }
+}
+
+function addTime() {
+  const el = document.getElementById("timeIn");
+  if (el.value) {
+    lastTime = parseFloat(el.value).toFixed(2);
+    entries.push({ time: lastTime, s: shift, r: race + 1, name: "" });
+    refresh();
+    el.value = ""; el.focus();
+    setTimeout(() => { race++; updateCounters(); }, 5000);
+  }
+}
+
+function applyUpdate(idx) {
+  if (entries[idx]) {
+    const tVal = document.getElementById("t" + (idx+1)).value;
+    const nVal = document.getElementById("n" + (idx+1)).value;
+    if(tVal) entries[idx].time = parseFloat(tVal).toFixed(2);
+    entries[idx].name = nVal;
+    refresh();
+  }
+}
+
+function raceUp() { race++; updateCounters(); }
+function raceDown() { if(race > 0) race--; updateCounters(); }
+function shiftUp() { shift++; updateCounters(); }
+function shiftDown() { if(shift > 0) shift--; updateCounters(); }
+function allReset() { if(confirm("Clear All Data?")) { entries = []; shift = 0; race = 0; lastTime = "0.00"; localStorage.clear(); updateCounters(); } }
+function prevReset() { lastTime = "0.00"; refresh(); }
+function raceResetWithShift() { shift++; race = 0; lastTime = "0.00"; updateCounters(); }
+
+loadData();
+</script>
+</body>
+</html>
